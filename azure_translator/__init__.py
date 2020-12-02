@@ -20,13 +20,19 @@ class Translator(object):
     HTTP_TIMEOUT = 10  # seconds
 
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, location=None):
         self.api_key = api_key
+        self.location = location
 
     def get_access_token(self):
         """
         Retrieve an access token in order to use the Translator API.
         """
+        if self.location:
+            location = {"Ocp-Apim-Subscription-Region": self.location}
+        else:
+            location = {}
+            
         try:
             resp = requests.post(
                 self.TOKEN_API,
@@ -34,7 +40,8 @@ class Translator(object):
                     'Content-Type': 'application/json',
                     'Accept': 'application/jwt',
                     'Ocp-Apim-Subscription-Key': self.api_key,
-                },
+                    'Ocp-Apim-Subscription-Region': self.location
+                }.update(location),
                 timeout=self.HTTP_TIMEOUT
             )
             resp.raise_for_status()
